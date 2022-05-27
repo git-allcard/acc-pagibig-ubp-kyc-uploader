@@ -2,7 +2,7 @@
 	{
 		"WSRepo": "D:\\WORK\\PAGIBIG\\UBP\\SFTP",
 		"BankRepo": "D:\\WORK\\PAGIBIG\\UBP\\SFTP",		
-		"DbaseConStr": "Server=10.88.87.68;Database=LCDB_01;User=allcard;Password=MikasaAckerman#;",		
+		"DbaseConStr": "Server=10.88.77.68;Database=LCDB_01;User=allcard;Password=MalboroLights#;",		
 		"SftpHost": "sftp.allcardtech.com.ph",
 		"SftpPort": 2022,
 		"SftpUser": "bayambang",
@@ -16,7 +16,7 @@
 		"SftpRemotePathUF_Zip": "/Bayambang/test e/DataCaptureFiles/",
 		"SftpRemotePathCR_Zip": "/Bayambang/test e/DataCaptureFiles/ForCardReplacement/",
 		"SendToSftp": 1,
-		"BankWS": "http://172.16.7.171:82/",
+		"BankWS": "http://10.88.87.67:8444/",
 		"ProcessInterval": 120,
 		"EncryptPagibigMemUF": 0,
 		"EncryptPagibigMemCR": 1,

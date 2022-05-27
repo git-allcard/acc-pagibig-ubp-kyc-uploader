@@ -27,7 +27,7 @@
       <Value Profile="(Default)">Server=10.88.87.68;Database=LCDB_01_SYS;User=allcard;Password=MikasaAckerman#;</Value>
     </Setting>
     <Setting Name="accpagibigph3srvZIP_bank_ws_ACC_MS_WEBSERVICE" Type="(Web Service URL)" Scope="Application">
-      <Value Profile="(Default)">http://localhost:1650/ACC_MS_WEBSERVICE.asmx</Value>
+      <Value Profile="(Default)">http://10.88.87.67:8444/ACC_MS_WEBSERVICE.asmx</Value>
     </Setting>
   </Settings>
 </SettingsFile>

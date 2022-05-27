@@ -1,0 +1,9 @@
+Release notes:
+
+v1.0.0.1 March 16, 2022 (accpagibigph3srvTXT,accpagibigph3srvZIP)
+- save new card's KYC file (zip) by date
+- restructure config settings to json
+
+v1.0.0.3 May 27, 2022 (accpagibigph3srvTXT)
+- regenerate missing image files (photo, signature, validId, ansi, wsq) of members kyc
+

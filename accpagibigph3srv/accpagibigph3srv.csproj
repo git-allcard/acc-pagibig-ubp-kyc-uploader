@@ -7,7 +7,7 @@
     <ProjectGuid>{72EEBFB4-EADA-48C8-9A32-6F18B1136F2B}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>accpagibigph3srv</RootNamespace>
-    <AssemblyName>accpagibigph3srvZIP</AssemblyName>
+    <AssemblyName>accpagibigph3srvTXT</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -48,6 +48,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.EnterpriseServices" />
     <Reference Include="System.Web.Services" />
     <Reference Include="System.Xml.Linq" />

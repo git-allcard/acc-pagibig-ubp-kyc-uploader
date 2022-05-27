@@ -45,10 +45,18 @@ namespace accpagibigph3srv
 
             System.Threading.Thread.Sleep(5000);
 
+            //List<string> incompleteData = new List<string>();
+            //incompleteData.Add(@"D:\WORK\PAGIBIG\UBP\SFTP\109882658797" + "|109882658797");
+            //incompleteData.Add(@"D:\WORK\PAGIBIG\UBP\SFTP\109883170814" + "|109883170814");
+            //incompleteData.Add(@"D:\WORK\PAGIBIG\UBP\SFTP\109884136061" + "|109884136061");
+
+            //RegenerateFolderWithIncompleteDetails(incompleteData);
+            //return;
+
             dlgtProcess _delegate = new dlgtProcess(RunProcess);
             _delegate.Invoke();
             _delegate = null;
-        }      
+        }
 
         private static bool Initv2()
         {
@@ -178,7 +186,7 @@ namespace accpagibigph3srv
             HouseKeeping(UBP_REPO_RECARD);
 
             LogToSystemLog(string.Format("Application close [{0}]", Utilities.APP_NAME));
-        }     
+        }
 
         public static string RemoveSpecialCharacters(string str)
         {
@@ -187,13 +195,15 @@ namespace accpagibigph3srv
             return str.Replace("Ñ", "N").Replace("ñ", "n").Replace("#", " ").Replace("-", " ").Replace("(", " ").Replace(")", " ").Replace("&", " ").Replace("'", " ").Replace("\"", " ").Replace("+", " ").Replace("�", "N");
             // + Ñ ñ 
             //#-()&"'+Ññ 
-        }     
-        
+        }
+
 
         public static void SegregateMemFileAndFolders(string workingFolder)
         {
             string _FOR_PAGIBIGMEMCONSO = string.Format(@"{0}\FOR_PAGIBIGMEMCONSO", workingFolder);
             string _FOR_ZIP_PROCESS = string.Format(@"{0}\FOR_ZIP_PROCESS", workingFolder);
+
+            List<string> incompleteData = new List<string>();
 
             foreach (string subDir in Directory.GetDirectories(workingFolder))
             {
@@ -276,8 +286,184 @@ namespace accpagibigph3srv
                     else
                     {
                         LogToErrorLog(string.Format("{0}{1}", subDir, ".  Incomplete files"));
+
+                        //log for reprocess
+                        incompleteData.Add(string.Concat(subDir, "|", acctNo));
                     }
-                }                
+                }
+            }
+
+            //added by edel May2022
+            RegenerateFolderWithIncompleteDetails(incompleteData);
+        }
+
+        private static string GetRecardRefNum(string mid, string cardNo)
+        {
+            if (dal.SelectQuery(string.Format("select RefNum, PagIBIGID, CardNo, AccountNumber from tbl_DCS_Card_Account where PagIBIGID = '{0}' order by id", mid)))
+            {
+                bool isCardNoMatched = false;
+                string refNum = "";
+
+                foreach (System.Data.DataRow rw in dal.TableResult.Rows)
+                {
+                    string recardCardNo = rw["CardNo"].ToString();
+
+                    if (recardCardNo.Substring(recardCardNo.Length - 4) == cardNo.Substring(cardNo.Length - 4))
+                    {
+                        isCardNoMatched = true;
+                        refNum = rw["RefNum"].ToString();
+                        break;
+                    }
+                }
+
+                if (isCardNoMatched) return refNum;
+                else return "";
+            }
+            else
+            {
+                LogToErrorLog(string.Format("{0}{1}", mid, ".  GetRecardRefNum(): Failed to query card account."));
+                return "";
+            }
+        }
+
+        private static void RegenerateFolderWithIncompleteDetails(List<string> incompleteData)
+        {
+            if (incompleteData.Count == 0) return;
+
+            var memberQuery = "select id, refnum, PagIBIGID, Application_Remarks from tbl_Member where pagibigid = '?' and Application_Remarks = 'New card'";
+            var photoQuery = "select fld_Photo from tbl_Photo where RefNum = '?'";
+            var signatureQuery = "select fld_Signature from tbl_Signature where RefNum = '?'";
+            var validIdQuery = "select fld_PhotoID from tbl_PhotoValidID where RefNum = '?'";
+            var bioQuery = "select fld_LeftPrimaryFP_Ansi, fld_LeftSecondaryFP_Ansi, fld_RightPrimaryFP_Ansi, fld_RightSecondaryFP_Ansi, fld_LeftPrimaryFP_Wsq, fld_LeftSecondaryFP_Wsq,fld_RightPrimaryFP_Wsq, fld_RightSecondaryFP_Wsq from tbl_bio where RefNum = '?'";
+
+            foreach (string o in incompleteData)
+            {
+                string subDir = o.Split('|')[0];
+                string acctNo = o.Split('|')[1];
+                string refNum = "";
+                string Card_Account_No = "";
+
+                string sourceFile = string.Format(@"{0}\{1}.txt", subDir, acctNo);
+
+                if (File.Exists(sourceFile))
+                {
+                    string data = File.ReadAllText(sourceFile);
+                    string mid = data.Split('|')[32];
+                    Card_Account_No = data.Split('|')[0];
+
+                    if (!subDir.Contains(@"\RECARD"))
+                    {
+                        if (dal.SelectQuery(memberQuery.Replace("?", mid)))
+                        { if (dal.TableResult.DefaultView.Count > 0) refNum = dal.TableResult.Rows[0]["refnum"].ToString().Trim(); }
+                        else
+                        {
+                            LogToErrorLog(string.Format("{0}{1}", subDir, ".  RegenerateFolderWithIncompleteDetails(): Failed to query member."));
+                            break;
+                        }
+                    }
+                    else refNum = GetRecardRefNum(mid, Card_Account_No);
+
+                    if (refNum == "")
+                    {
+                        LogToErrorLog(string.Format("{0}{1}", subDir, ".  RegenerateFolderWithIncompleteDetails(): Unable to find mid " + mid + " refnum"));
+                        break;
+                    }
+
+                    //check if valid mid
+                    if (mid.Trim().Length == 12)
+                    {
+                        string FPLP_ansi = Path.Combine(subDir, string.Format("{0}FPLP-ansi.ansi", acctNo));
+                        string FPLB_ansi = Path.Combine(subDir, string.Format("{0}FPLB-ansi.ansi", acctNo));
+                        string FPRP_ansi = Path.Combine(subDir, string.Format("{0}FPRP-ansi.ansi", acctNo));
+                        string FPRB_ansi = Path.Combine(subDir, string.Format("{0}FPRB-ansi.ansi", acctNo));
+
+                        string FPLP_wsq = Path.Combine(subDir, string.Format("{0}FPLP-wsq.wsq", acctNo));
+                        string FPLB_wsq = Path.Combine(subDir, string.Format("{0}FPLB-wsq.wsq", acctNo));
+                        string FPRP_wsq = Path.Combine(subDir, string.Format("{0}FPRP-wsq.wsq", acctNo));
+                        string FPRB_wsq = Path.Combine(subDir, string.Format("{0}FPRB-wsq.wsq", acctNo));
+
+                        string photo = Path.Combine(subDir, string.Format("{0}ph.jpg", acctNo));
+                        string signature = Path.Combine(subDir, string.Format("{0}s.jpg", acctNo));
+                        string validId = Path.Combine(subDir, string.Format("{0}i.jpg", acctNo));
+
+                        ByteToFile(photoQuery, refNum, 0, photo, false);
+                        ByteToFile(signatureQuery, refNum, 0, signature, true);
+                        ByteToFile(validIdQuery, refNum, 0, validId, false);
+
+                        ByteToFile(bioQuery, refNum, 0, FPLP_ansi, false);
+                        ByteToFile(bioQuery, refNum, 1, FPLB_ansi, false);
+                        ByteToFile(bioQuery, refNum, 2, FPRP_ansi, false);
+                        ByteToFile(bioQuery, refNum, 3, FPRB_ansi, false);
+
+                        ByteToFile(bioQuery, refNum, 4, FPLP_wsq, false);
+                        ByteToFile(bioQuery, refNum, 5, FPLB_wsq, false);
+                        ByteToFile(bioQuery, refNum, 6, FPRP_wsq, false);
+                        ByteToFile(bioQuery, refNum, 7, FPRB_wsq, false);
+
+                        if (Directory.GetFiles(subDir).Length == 12) LogToErrorLog(string.Format("{0}{1}", subDir, ".  RegenerateFolderWithIncompleteDetails(): Files complete."));
+
+                    }
+                }
+                else LogToErrorLog(string.Format("{0}{1}", subDir, ".  RegenerateFolderWithIncompleteDetails(): No txt file."));
+            }
+        }
+
+        //private static void ByteToFile(byte[] img, string file, bool isSig)
+        private static void ByteToFile(string query, string refNum, int fieldIndex, string file, bool isSig)
+        {
+            if (File.Exists(file)) return;
+
+            query = query.Replace("?", refNum);
+
+            if (!dal.SelectQuery(query))
+            {
+                LogToErrorLog(string.Format("{0}. {1}", query, "ByteToFile(): Failed query."));
+                return;
+            }
+
+            if (dal.TableResult.DefaultView.Count == 0)
+            {
+                LogToErrorLog(string.Format("{0}. {1}", query, "ByteToFile(): No record."));
+                return;
+            }
+
+
+            try
+            {
+                byte[] img = (byte[])dal.TableResult.Rows[0][fieldIndex];
+                if (img != null)
+                {
+                    if (isSig)
+                    {
+                        var sigTiff = TIFFtoJPG(img);
+                        if (sigTiff != null) System.IO.File.WriteAllBytes(file, sigTiff);
+                        else System.IO.File.WriteAllBytes(file, img);
+                    }
+                    else System.IO.File.WriteAllBytes(file, img);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogToErrorLog(string.Format("{0}. {1}", query, "ByteToFile(): Failed to convert to file. " + ex.Message));
+            }
+        }
+
+        public static byte[] TIFFtoJPG(byte[] img)
+        {
+            try
+            {
+                MemoryStream ms = new MemoryStream();
+
+                using (System.Drawing.Bitmap image = new System.Drawing.Bitmap(new MemoryStream(img)))
+                {
+                    image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+                }
+
+                return ms.ToArray();
+            }
+            catch (Exception ex)
+            {
+                return null;
             }
         }
 
@@ -322,7 +508,7 @@ namespace accpagibigph3srv
             {
                 if (subDir.Replace("\n", "") != "") Directory.Delete(subDir.Replace("\n", ""), true);
             }
-        }        
+        }
 
         //private static bool GenerateCancelledMemFile()
         //{
@@ -742,7 +928,7 @@ namespace accpagibigph3srv
                     //if (Directory.GetFiles(subDir).Length == 0) DeleteFolder(subDir);
                 }
             }
-        }      
+        }
 
 
         #region Helpers
@@ -795,7 +981,7 @@ namespace accpagibigph3srv
         {
             Console.WriteLine(Utilities.TimeStamp() + logDesc);
             Log.SaveToErrorLog(Utilities.TimeStamp() + logDesc);
-        }   
+        }
 
         #endregion
 

@@ -35,3 +35,14 @@ D:\WORK\Projects\accpagibigph3srv\accpagibigph3srv\bin\Debug\accpagibigph3srvZIP
 D:\WORK\Projects\accpagibigph3srv\accpagibigph3srv\bin\Debug\accpagibigph3srvZIP.pdb
 D:\WORK\Projects\accpagibigph3srv\accpagibigph3srv\obj\Debug\accpagibigph3srvZIP.exe
 D:\WORK\Projects\accpagibigph3srv\accpagibigph3srv\obj\Debug\accpagibigph3srvZIP.pdb
+D:\WORK\Projects\acc-pagibig-ubp-kyc-uploader\accpagibigph3srv\bin\Debug\Newtonsoft.Json.dll
+D:\WORK\Projects\acc-pagibig-ubp-kyc-uploader\accpagibigph3srv\bin\Debug\WinSCPnet.dll
+D:\WORK\Projects\acc-pagibig-ubp-kyc-uploader\accpagibigph3srv\bin\Debug\Newtonsoft.Json.xml
+D:\WORK\Projects\acc-pagibig-ubp-kyc-uploader\accpagibigph3srv\obj\Debug\accpagibigph3srv.csproj.AssemblyReference.cache
+D:\WORK\Projects\acc-pagibig-ubp-kyc-uploader\accpagibigph3srv\obj\Debug\accpagibigph3srv.csproj.CoreCompileInputs.cache
+D:\WORK\Projects\acc-pagibig-ubp-kyc-uploader\accpagibigph3srv\obj\Debug\accpagibigph3srv.csproj.CopyComplete
+D:\WORK\Projects\acc-pagibig-ubp-kyc-uploader\accpagibigph3srv\bin\Debug\accpagibigph3srvTXT.exe.config
+D:\WORK\Projects\acc-pagibig-ubp-kyc-uploader\accpagibigph3srv\bin\Debug\accpagibigph3srvTXT.exe
+D:\WORK\Projects\acc-pagibig-ubp-kyc-uploader\accpagibigph3srv\bin\Debug\accpagibigph3srvTXT.pdb
+D:\WORK\Projects\acc-pagibig-ubp-kyc-uploader\accpagibigph3srv\obj\Debug\accpagibigph3srvTXT.exe
+D:\WORK\Projects\acc-pagibig-ubp-kyc-uploader\accpagibigph3srv\obj\Debug\accpagibigph3srvTXT.pdb
